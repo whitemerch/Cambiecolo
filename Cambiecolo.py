@@ -2,11 +2,12 @@ import pygame
 from pygame.locals import *
 import pygame_textinput
 
-from multiprocessing import Queue, Lock
+from multiprocessing import Process, Queue, Lock, Manager
 import random
 
+queue=Queue()
 
-class Joueur:
+class Joueur():
     def __init__(self,identifiant,main):
         self.identifiant=identifiant
         self.main=main
@@ -36,6 +37,9 @@ def shuffle(deck):
     random.shuffle(deck)
     return deck
 
+def jeu(ch):
+    dh=1
+
 def gagner(list):
     gagner=False
     if list.count(list[0])==len(list):
@@ -44,9 +48,46 @@ def gagner(list):
 
 
 if __name__=="__main__":
-    
-    nb=int(input("nbr de joueurs: "))
-    deck=shuffle(deck(nb))
+    with Manager() as manager:
+        offres=manager.dict() #Nos offres sont contenues dans un dictionnaire dans le processus principal modifiable par les process
+        mains=manager.dict()#Nos mains sont contenues dans un dictionnaire dans le processus principal modifiable par les process
+        nb=int(input("nbr de joueurs: "))
+        deck=shuffle(deck(nb))
+        k=0
+        for i in range(1,6):
+            mains[i]=deck[k:k+5]
+            k+=5
+        #mains={1:[Shoes, Airplane, Shoes, Bike, Airplane], 2:[...]...}
+        j1=Joueur("joueur1", mains[1])
+        p1=Process(target=jeu,args=(j1,))
+
+        j2=Joueur("joueur1", mains[2])
+        p2=Process(target=jeu,args=(j2,))
+
+        j3=Joueur("joueur1", mains[3])
+        p3=Process(target=jeu,args=(j3,))
+
+        j4=Joueur("joueur1", mains[4])
+        p4=Process(target=jeu,args=(j4,))
+
+        j5=Joueur("joueur1", mains[5])
+        p5=Process(target=jeu,args=(j1,))
+
+        p1.start()
+        p2.start()
+        p3.start()
+        p4.start()
+        p5.start()
+        p1.join()
+        p2.join()
+        p3.join()
+        p4.join()
+        p5.join()
+
+        
+
+        
+        
 
 
     #if gagner(list):
