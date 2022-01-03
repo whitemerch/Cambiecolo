@@ -5,7 +5,6 @@ import pygame_textinput
 from multiprocessing import Queue, Lock
 import random
 
-from _thread import *
 
 class Joueur:
     def __init__(self,identifiant,main):
@@ -48,6 +47,7 @@ if __name__=="__main__":
     
     nb=int(input("nbr de joueurs: "))
     deck=shuffle(deck(nb))
+
 
     #if gagner(list):
         #envoyer signaux a tous les clients
