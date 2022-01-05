@@ -39,16 +39,21 @@ def shuffle(deck):
     return deck
 
 def jeu(joueur):
-    pass
+    if gagner(joueur.main)==True:
+        print("Vous avez gagné")
+    else:
+        print("Vous n'avez pas gagné. Mytho")
+    
 
-def faireoffre(list,joueur):
-    offres[joueur.identifiant[6]]=list
+
+def faireoffre(a,joueur):
+    offres[joueur.identifiant[6]]=a
 
 def retireroffre(joueur):
-    joueur.main.append(offres[joueur.identifiant[6]])
-    del offres[joueur.identifiant[6]]
-
-
+    try:
+        del offres[joueur.identifiant[6]]
+    except KeyError:
+        print("Vous n'avez pas fait d'offres")
 
 def gagner(list):
     gagner=False
