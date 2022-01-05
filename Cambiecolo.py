@@ -39,7 +39,16 @@ def shuffle(deck):
     return deck
 
 def jeu(joueur):
-    
+    pass
+
+def faireoffre(list,joueur):
+    offres[joueur.identifiant[6]]=list
+
+def retireroffre(joueur):
+    joueur.main.append(offres[joueur.identifiant[6]])
+    del offres[joueur.identifiant[6]]
+
+
 
 def gagner(list):
     gagner=False
@@ -51,10 +60,10 @@ def gagner(list):
 if __name__=="__main__":
     with Manager() as manager:
         offres=manager.dict() #Nos offres sont contenues dans un dictionnaire dans le processus principal modifiable par les process
-        mains=manager.dict()#Nos mains sont contenues dans un dictionnaire dans le processus principal modifiable par les process
         nb=int(input("nbr de joueurs: "))
         deck=shuffle(deck(nb))
         k=0
+        mains={}
         for i in range(1,6):
             mains[i]=deck[k:k+5]
             k+=5
@@ -62,17 +71,18 @@ if __name__=="__main__":
         j1=Joueur("joueur1", mains[1])
         p1=Process(target=jeu,args=(j1,))
 
-        j2=Joueur("joueur1", mains[2])
+        j2=Joueur("joueur2", mains[2])
         p2=Process(target=jeu,args=(j2,))
 
-        j3=Joueur("joueur1", mains[3])
+        j3=Joueur("joueur3", mains[3])
         p3=Process(target=jeu,args=(j3,))
 
-        j4=Joueur("joueur1", mains[4])
+        j4=Joueur("joueur4", mains[4])
         p4=Process(target=jeu,args=(j4,))
 
-        j5=Joueur("joueur1", mains[5])
+        j5=Joueur("joueur5", mains[5])
         p5=Process(target=jeu,args=(j1,))
+
 
         p1.start()
         p2.start()
