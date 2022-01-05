@@ -1,23 +1,27 @@
 import pygame
 from pygame.locals import *
 import pygame_textinput
-
-from multiprocessing import Process, Queue, Lock, Manager
+from multiprocessing import Lock
 import random
+import threading
+import sysv_ipc
+import os
 
-queue=Queue()
-mutex=Lock()
-pygame.init()
-fenetre=pygame.display.set_mode((612,357), RESIZABLE)
-pygame.display.set_caption("Joueur")
-fond=pygame.image.load('background.jpg').convert()
-fenetre.blit(fond, (0,0))
-pygame.display.flip()
-continuer = 1
-while continuer:
-    for event in pygame.event.get():   
-        if event.type == QUIT:     
-            continuer = 0  
+keyConnect = 300
+
+connexions = sysv_ipc.MessageQueue(keyConnect, sysv_ipc.IPC_CREAT)
+
+#pygame.init()
+#fenetre=pygame.display.set_mode((612,357), RESIZABLE)
+#pygame.display.set_caption("Joueur")
+#fond=pygame.image.load('background.jpg').convert()
+#fenetre.blit(fond, (0,0))
+#pygame.display.flip()
+#continuer = 1
+#while continuer:
+    #for event in pygame.event.get():   
+        #if event.type == QUIT:     
+            #continuer = 0  
 
 class Joueur():
     def __init__(self,identifiant, main, voyant):
@@ -57,8 +61,6 @@ def jeu(joueur):
         print("Vous n'avez pas gagné. Mytho")
     
     
-
-
 def faireoffre(a,joueur):
     offres[joueur.identifiant[6]]=a
 
@@ -76,7 +78,7 @@ def gagner(list):
 
 
 if __name__=="__main__":
-    with Manager() as manager:
+    with () as manager:
         offres=manager.dict() #Nos offres sont contenues dans un dictionnaire dans le processus principal modifiable par les process
         joueurs=manager.list()
         nb=int(input("nbr de joueurs: "))
@@ -88,29 +90,14 @@ if __name__=="__main__":
             k+=5
         #mains={1:[Shoes, Airplane, Shoes, Bike, Airplane], 2:[...]...}
         j1=Joueur("joueur1", mains[1], 1)
-        p1=Process(target=jeu,args=(j1,))
 
         j2=Joueur("joueur2", mains[2], 1)
-        p2=Process(target=jeu,args=(j2,))
 
         j3=Joueur("joueur3", mains[3], 1)
-        p3=Process(target=jeu,args=(j3,))
 
         j4=Joueur("joueur4", mains[4], 1)
-        p4=Process(target=jeu,args=(j4,))
 
-        j5=Joueur("joueur5", mains[5],1)
-        p5=Process(target=jeu,args=(j1,))
+        j5=Joueur("joueur5", mains[5], 1)
 
         joueurs.extend([j1,j2,j3,j4,j5])
 
-        p1.start()
-        p2.start()
-        p3.start()
-        p4.start()
-        p5.start()
-        p1.join()
-        p2.join()
-        p3.join()
-        p4.join()
-        p5.join()
