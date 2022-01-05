@@ -1,3 +1,4 @@
+from multiprocessing.managers import SharedMemoryManager
 import pygame
 from pygame.locals import *
 import pygame_textinput
@@ -8,8 +9,10 @@ import sysv_ipc
 import os
 
 keyConnect = 300
-
+keydata=400
 connexions = sysv_ipc.MessageQueue(keyConnect, sysv_ipc.IPC_CREAT)
+data=sysv_ipc.MessageQueue(keydata, sysv_ipc.IPC_CREAT)
+playing=True
 
 #pygame.init()
 #fenetre=pygame.display.set_mode((612,357), RESIZABLE)
@@ -41,6 +44,9 @@ class Carte:
     def __str__(self):
         return self.transport
 
+def connection_server():
+    while playing:
+        
 #k depends on the number of player there. It's a variable that we whould get once everyone is connected
 def deck(k):
     deck=[]
@@ -78,10 +84,11 @@ def gagner(list):
 
 
 if __name__=="__main__":
-    with () as manager:
-        offres=manager.dict() #Nos offres sont contenues dans un dictionnaire dans le processus principal modifiable par les process
-        joueurs=manager.list()
-        nb=int(input("nbr de joueurs: "))
+    with SharedMemoryManager() as smm:
+        offres=smm.ShareableList() #Nos offres sont contenues dans un dictionnaire dans le processus principal modifiable par les process
+        joueurs=smm.list()
+        thread=threading.Thread(target=connection_server)
+        nb=int(input("nbr de joueurs: ")) #nbr de co
         deck=shuffle(deck(nb))
         k=0
         mains={}
