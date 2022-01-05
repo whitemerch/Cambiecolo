@@ -20,14 +20,14 @@ while continuer:
             continuer = 0  
 
 class Joueur():
-    def __init__(self,identifiant,main, voyant):
+    def __init__(self,identifiant, main, voyant):
         self.identifiant=identifiant
         self.main=main
         self.voyant=voyant
-    def enlever_main(self,main,donne):
+    def enlever_main(self, donne):
         for i in donne:
             self.main.remove(i)
-    def ajouter_main(self,main,recu):
+    def ajouter_main(self, recu):
         for i in recu:
             self.main.append(i)
 
