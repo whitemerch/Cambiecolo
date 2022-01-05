@@ -7,11 +7,23 @@ import random
 
 queue=Queue()
 mutex=Lock()
+pygame.init()
+fenetre=pygame.display.set_mode((612,357), RESIZABLE)
+pygame.display.set_caption("Joueur")
+fond=pygame.image.load('background.jpg').convert()
+fenetre.blit(fond, (0,0))
+pygame.display.flip()
+continuer = 1
+while continuer:
+    for event in pygame.event.get():   
+        if event.type == QUIT:     
+            continuer = 0  
 
 class Joueur():
-    def __init__(self,identifiant,main):
+    def __init__(self,identifiant,main, voyant):
         self.identifiant=identifiant
         self.main=main
+        self.voyant=voyant
     def enlever_main(self,main,donne):
         for i in donne:
             self.main.remove(i)
@@ -40,9 +52,10 @@ def shuffle(deck):
 
 def jeu(joueur):
     if gagner(joueur.main)==True:
-        print("Vous avez gagné")
+            print("Vous avez gagné")
     else:
         print("Vous n'avez pas gagné. Mytho")
+    
     
 
 
@@ -65,6 +78,7 @@ def gagner(list):
 if __name__=="__main__":
     with Manager() as manager:
         offres=manager.dict() #Nos offres sont contenues dans un dictionnaire dans le processus principal modifiable par les process
+        joueurs=manager.list()
         nb=int(input("nbr de joueurs: "))
         deck=shuffle(deck(nb))
         k=0
@@ -73,21 +87,22 @@ if __name__=="__main__":
             mains[i]=deck[k:k+5]
             k+=5
         #mains={1:[Shoes, Airplane, Shoes, Bike, Airplane], 2:[...]...}
-        j1=Joueur("joueur1", mains[1])
+        j1=Joueur("joueur1", mains[1], 1)
         p1=Process(target=jeu,args=(j1,))
 
-        j2=Joueur("joueur2", mains[2])
+        j2=Joueur("joueur2", mains[2], 1)
         p2=Process(target=jeu,args=(j2,))
 
-        j3=Joueur("joueur3", mains[3])
+        j3=Joueur("joueur3", mains[3], 1)
         p3=Process(target=jeu,args=(j3,))
 
-        j4=Joueur("joueur4", mains[4])
+        j4=Joueur("joueur4", mains[4], 1)
         p4=Process(target=jeu,args=(j4,))
 
-        j5=Joueur("joueur5", mains[5])
+        j5=Joueur("joueur5", mains[5],1)
         p5=Process(target=jeu,args=(j1,))
 
+        joueurs.extend([j1,j2,j3,j4,j5])
 
         p1.start()
         p2.start()
@@ -99,25 +114,3 @@ if __name__=="__main__":
         p3.join()
         p4.join()
         p5.join()
-
-        
-
-        
-        
-
-
-    #if gagner(list):
-        #envoyer signaux a tous les clients
-
-#pygame.init()
-#fenetre=pygame.display.set_mode((612,357), RESIZABLE)
-#pygame.display.set_caption("Joueur")
-#fond=pygame.image.load('background.jpg').convert()
-#fenetre.blit(fond, (0,0))
-#pygame.display.flip()
-
-#continuer = 1
-#while continuer:
-	#for event in pygame.event.get():   
-		#if event.type == QUIT:     
-			#continuer = 0  
