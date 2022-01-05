@@ -6,6 +6,7 @@ from multiprocessing import Process, Queue, Lock, Manager
 import random
 
 queue=Queue()
+mutex=Lock()
 
 class Joueur():
     def __init__(self,identifiant,main):
@@ -37,8 +38,8 @@ def shuffle(deck):
     random.shuffle(deck)
     return deck
 
-def jeu(ch):
-    dh=1
+def jeu(joueur):
+    
 
 def gagner(list):
     gagner=False
