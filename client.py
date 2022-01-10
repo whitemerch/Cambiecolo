@@ -1,12 +1,20 @@
 import sysv_ipc
 import sys
 import os
+import sys
 
 key=300
+keyjeu=400
 
 #We connect to the message queue
 try:
     mq = sysv_ipc.MessageQueue(key)
+except sysv_ipc.ExistentialError:
+    print("The message queue you're trying to connect to doesn't exist.")
+    sys.exit(1)
+
+try:
+    mqjeu=sysv_ipc.MessageQueue(keyjeu)
 except sysv_ipc.ExistentialError:
     print("The message queue you're trying to connect to doesn't exist.")
     sys.exit(1)
@@ -28,10 +36,13 @@ while True:
     if t == 3:
         print(m.decode())
         sys.exit(1)
-
+state = True
 while True:
+    {1:True,2:True}
+    #if state:
     m , t = mq.receive(type=os.getpid())
     m = m.decode()
+        #if m ==
     print(m)
 
 
