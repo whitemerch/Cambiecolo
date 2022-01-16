@@ -49,8 +49,8 @@ if __name__ == "__main__":
 
         # Creating our dict of offers and availability which is empty at the beginning
         offres = sm.get_offers()
-        offres[pid] = []
-        sm.set_offers(offres, pid)
+        offre_i=[]
+        sm.set_offers(offre_i, pid)
 
         sm.set_flag(True, pid)
 
@@ -71,7 +71,8 @@ if __name__ == "__main__":
         mq.send(main, type=pid)
 
 
-    
+    test=sm.get_offers()
+    print(test)
     signal.signal(signal.SIGUSR2, handler)
     signal.pause()
 #Fermer les msgs queues
