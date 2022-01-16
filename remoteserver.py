@@ -5,6 +5,7 @@ class MyRemoteClass:
 
     def __init__(self):
         self.available= {}
+        self.points={}
         self.offers= {}
         self.lock= Lock()
 
@@ -19,6 +20,12 @@ class MyRemoteClass:
 
     def set_offers(self, pushed_list, key):
         self.offers[key] = pushed_list
+
+    def get_points(self):
+        return self.points
+
+    def set_points(self, pushed_int, key):
+        self.points[key]=pushed_int
 
     def acquire_lock(self):
         self.lock.acquire()

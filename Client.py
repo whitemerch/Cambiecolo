@@ -4,6 +4,8 @@ import sys
 import signal
 from multiprocessing.managers import BaseManager
 
+main=[]
+
 class MyManager(BaseManager): pass
 MyManager.register('sm')
 man = MyManager(address=("127.0.0.1", 8888), authkey=b'abracadabra')
@@ -19,6 +21,7 @@ def bell(pid):
     bell.release_bell()
 
 def handler(sig, frame):
+    global main
     if sig==signal.SIGUSR1:
         print("quelqu'un veut échanger avec vous")
         offres=sm.get_offers()
@@ -45,7 +48,21 @@ def handler(sig, frame):
 
     elif sig==signal.SIGUSR2:
         print("quelqu'un a remporté cette manche")
-        sys.exit(1)
+        print("en attente de la main ...")
+        m = str(pid)
+        m = m.encode()
+        mq.send(m, type=1)
+        # To receive the msg that tells the player that he's connected
+        m, _ = mq.receive(type=pid)
+        m = m.decode()
+        print(m)
+        #We get the ppid of the server
+        m, _ = mq.receive(type=pid)
+        ppid = int(m.decode())
+        #We get the hand of the player
+        m, _ = mq.receive(type=pid)
+        main=(m.decode()).split()
+        print("Que voulez vous faire? Faire une offre(F), en accepter une(A) ou faire sonner la sonnerie(S) ?")
 
 
 def valide (list, main):
@@ -60,6 +77,7 @@ def valide (list, main):
 
 
 def saisieCartes():
+    global main
     while True:
         print(main)
         cartes = str(input("quelles cartes voulez vous échanger ? "))
@@ -147,7 +165,12 @@ if __name__ == "__main__":
                                 break
                         if not(len(current[pid])==len(current[cible])):
                             cartes_list = saisieCartes()
+                            while not(len(cartes_list)==len(current[cible])):
+                                print("veuillez donner autant de cartes que le joueur")
+                                cartes_list = saisieCartes()
                         sm.acquire_lock()
+                        sm.set_offers(cartes_list, pid)
+                        current = sm.get_offers()
                         dispo = sm.get_flag()
                         dispo[pid] = False
                         dispo[cible] = False
@@ -189,4 +212,26 @@ if __name__ == "__main__":
                         print(main)
                         break
                     elif msg =="S":
-                        os.kill(ppid, signal.SIGUSR2)
+                        if not(len(set(main)) == 1):
+                            print("Vous n'avez pas que des cartes identiques")
+                        else:
+                            points=sm.get_points()
+                            if pid in points.keys():
+                                point=points[pid]
+                            else:
+                                point=0
+                            if main[0]=="Shoes":
+                                point+=1
+                            elif main[0]=="Bike":
+                                point+=2
+                            elif main[0]=="Train":
+                                point+=3
+                            elif main[0]=="Car":
+                                point+=4
+                            elif main[0]=="Airplane":
+                                point+=5
+                            sm.acquire_lock()
+                            sm.set_points(point, pid)
+                            sm.release_lock()
+                            os.kill(ppid, signal.SIGUSR2)
+                        break

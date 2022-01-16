@@ -5,6 +5,8 @@ import signal
 import os
 import sys
 
+mains_i = {}
+jeu = []
 
 class MyManager(BaseManager): pass
 MyManager.register('sm')
@@ -13,7 +15,6 @@ m.connect()
 sm=m.sm()
 
 key = 703
-mq = sysv_ipc.MessageQueue(key, sysv_ipc.IPC_CREAT)
 
 
 def handler(sig, frame):
@@ -21,23 +22,37 @@ def handler(sig, frame):
         for pid in mains_i.keys():
             os.kill(pid, signal.SIGUSR2)
     print("La partie est terminée")
-    mq.remove()
-    sys.exit(1)
+    print("voici le tableau des points")
+    print(sm.get_points())
+    while True:
+        suite = str(input("Do you want to continue ?(yes/no)"))
+        if suite == "yes":
+            print("Resume ...")
+            run()
+            break
+        elif suite == "no":
+            print("Leaving")
+            mq.remove()
+            sys.exit(1)
+        else:
+            print("Your input is incorrect. Retry ")
 
 
 def deck(n):
-    deck = []
+    global jeu
+    jeu = []
     transports = ["Shoes", "Bike", "Train", "Car", "Airplane"]
     for j in transports[:n]:
         for _ in range(5):
-            deck.append(j)
-    random.shuffle(deck)
-    return deck
+            jeu.append(j)
+    random.shuffle(jeu)
+    return jeu
 
-
-if __name__ == "__main__":
+def run():
+    global jeu
     n = int(input("How many players will play: "))
-    deck = deck(n)
+    jeu = deck(n)
+    global mains_i
     mains_i = {}
     i = 0
     k = 0
@@ -54,7 +69,7 @@ if __name__ == "__main__":
 
         sm.set_flag(True, pid)
 
-        main = deck[k:k + 5]
+        main = jeu[k:k + 5]
         mains_i[pid] = main
         msg = "You're connected. Waiting for other players..."
         msg = msg.encode()
@@ -70,11 +85,17 @@ if __name__ == "__main__":
         main = (' '.join(map(str, list))).encode()
         mq.send(main, type=pid)
 
-
-    test=sm.get_offers()
-    print(test)
     signal.signal(signal.SIGUSR2, handler)
     signal.pause()
 #Fermer les msgs queues
 #Continuer la partie
 #Faire dict de scores
+
+
+
+if __name__ == "__main__":
+    mq = sysv_ipc.MessageQueue(key, sysv_ipc.IPC_CREAT)
+    points=sm.get_points()
+    for pid in mains_i.keys():
+        sm.set_points(0, pid)
+    run()
