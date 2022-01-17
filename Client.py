@@ -15,7 +15,7 @@ man = MyManager(address=("127.0.0.1", 8888), authkey=b'abracadabra')
 man.connect()
 sm = man.sm()
 
-
+sysv_ipc
 def bell(pid):
     bell.acquire_bell()
     if list.count(list[0]) == len(list):
@@ -41,8 +41,8 @@ def handler(sig, frame):
         for q in range(len(cartes)):
             msg += cartes[q] + " "
         msg = msg.encode()
-        mq.send(msg, type=1)
-        n, _ = mq.receive(type=1)
+        mq.send(msg, type=3)
+        n, _ = mq.receive(type=3)
         newcards = (n.decode()).split()
         for l in range(len(newcards)):
             main.append(newcards[l])
@@ -176,9 +176,9 @@ if __name__ == "__main__":
                     while True:
                         dispo = sm.get_flag()
                         print(dispo)
-                        cible = int(input("Avec qui voulez vous échanger ? (Mettez E pour revenir en arrière) "))
-                        if cible == "E":
-                            t == False
+                        cible = int(input("Avec qui voulez vous échanger ? (Mettez 0 pour revenir en arrière) "))
+                        if cible == 0:
+                            t = False
                             break
                         elif cible not in dispo.keys():
                             print("le joueur n'existe pas")
@@ -230,7 +230,7 @@ if __name__ == "__main__":
                     for q in range(len(cartes)):
                         msg += cartes[q] + " "
                     msg = msg.encode()
-                    mq.send(msg, type=1)
+                    mq.send(msg, type=3)
 
                     sm.acquire_lock()
                     dispo = sm.get_flag()
