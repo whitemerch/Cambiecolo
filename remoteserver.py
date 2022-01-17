@@ -4,11 +4,12 @@ from multiprocessing import Lock
 
 class MyRemoteClass:
 
-    def __init__(self, number):
+    def __init__(self):
         self.available = {}
-        self.offer = {}
+        self.points = {}
+        self.offers = {}
         self.lock = Lock()
-        self.bell=Lock()
+        self.bell = Lock()
 
     def get_flag(self):
         return self.available
@@ -22,17 +23,24 @@ class MyRemoteClass:
     def set_offers(self, pushed_list, key):
         self.offers[key] = pushed_list
 
+    def get_points(self):
+        return self.points
+
+    def set_points(self, pushed_int, key):
+        self.points[key] = pushed_int
+
     def acquire_lock(self):
         self.lock.acquire()
-
-    def acquire_bell(self):
-        self.bell.acquire
 
     def release_lock(self):
         self.lock.release()
 
+    def acquire_bell(self):
+        self.bell.acquire
+
     def release_bell(self):
         self.bell.release()
+
 
 class MyManager(BaseManager):
     pass
