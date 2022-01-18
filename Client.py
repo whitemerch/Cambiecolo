@@ -3,6 +3,7 @@ import os
 import sys
 import signal
 from multiprocessing.managers import BaseManager
+import time
 
 main = []
 
@@ -14,15 +15,6 @@ MyManager.register('sm')
 man = MyManager(address=("127.0.0.1", 8888), authkey=b'abracadabra')
 man.connect()
 sm = man.sm()
-
-
-def bell(pid):
-    bell.acquire_bell()
-    if list.count(list[0]) == len(list):
-        os.kill(ppid, signal.SIGUSR2)
-        print("Vous avez gagné")
-    bell.release_bell()
-
 
 def handler(sig, frame):
     global main, ppid
@@ -41,8 +33,8 @@ def handler(sig, frame):
         for q in range(len(cartes)):
             msg += cartes[q] + " "
         msg = msg.encode()
-        mq.send(msg, type=1)
-        n, _ = mq.receive(type=1)
+        mq.send(msg, type=3)
+        n, _ = mq.receive(type=3)
         newcards = (n.decode()).split()
         for l in range(len(newcards)):
             main.append(newcards[l])
@@ -51,26 +43,25 @@ def handler(sig, frame):
 
 
     elif sig == signal.SIGUSR2:
-        print("quelqu'un a remporté cette manche")
-        print("en attente de la main ...")
-        m = str(pid)
-        m = m.encode()
-        mq.send(m, type=1)
-        # To receive the msg that tells the player that he's connected
-        m, _ = mq.receive(type=pid)
-        m = m.decode()
-        print(m)
-        # We get the ppid of the server
-        m, _ = mq.receive(type=pid)
-        ppid = int(m.decode())
+        print("\nFin de la partie!")
+        print("En attente de la main ...")
         # We get the hand of the player
-        m, _ = mq.receive(type=pid)
+        try:
+            m, _ = mq.receive(type=pid)
+        except sysv_ipc.Error:
+            sys.exit(1)
         main = (m.decode()).split()
+        print(main)
         print("Que voulez vous faire? Faire une offre(F), en accepter une(A) ou faire sonner la sonnerie(S) ?")
     elif sig == signal.SIGINT:
-        os.kill(ppid, signal.SIGINT)  # I send sigint to the server if there is an interruption
+        try:
+            os.kill(ppid, signal.SIGINT)  # I send sigint to the server if there is an interruption
+        except ProcessLookupError:
+            sys.exit(1)
+            pass
     elif sig==signal.SIGTERM:
         print("The game has been interrupted")
+        sys.exit(1)
 
 
 def valide(list, main):
@@ -126,7 +117,7 @@ if __name__ == "__main__":
             print("Leaving")
             sys.exit(1)
         else:
-            print("Your input is incorrect. Retry ")
+            print("Your input isets incorrect. Retry ")
     m = str(pid)
     m = m.encode()
     mq.send(m, type=1)
@@ -149,6 +140,7 @@ if __name__ == "__main__":
     while True:
         while True:
             t = True
+            time.sleep(1)
             print(main)
             print("What do you want to do ? Make an offer(F), accept one(A) or ring the bell(S) ?")
             msg = str(input("Make your choice: "))
@@ -176,10 +168,18 @@ if __name__ == "__main__":
                     while True:
                         dispo = sm.get_flag()
                         print(dispo)
-                        cible = int(input("Avec qui voulez vous échanger ? (Mettez E pour revenir en arrière) "))
-                        if cible == "E":
-                            t == False
+                        while True:
+                            cible = input("Avec qui voulez vous échanger ? (Mettez 0 pour revenir en arrière) ")
+                            if cible.isnumeric():
+                                cible=int(cible)
+                                break
+                            else:
+                                print("Bad Input! Try again ")
+                        if cible == 0:
+                            t = False
                             break
+                        elif cible==pid:
+                            print("Vous ne pouvez pas accepter votre propre offre")
                         elif cible not in dispo.keys():
                             print("le joueur n'existe pas")
                         elif not (current[cible]):
@@ -230,7 +230,7 @@ if __name__ == "__main__":
                     for q in range(len(cartes)):
                         msg += cartes[q] + " "
                     msg = msg.encode()
-                    mq.send(msg, type=1)
+                    mq.send(msg, type=3)
 
                     sm.acquire_lock()
                     dispo = sm.get_flag()
@@ -247,6 +247,7 @@ if __name__ == "__main__":
                     if not (len(set(main)) == 1):
                         print("Vous n'avez pas des cartes identiques")
                     else:
+                        print("Vous avez gagné")
                         points = sm.get_points()
                         if pid in points.keys():
                             point = points[pid]

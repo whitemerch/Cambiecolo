@@ -9,7 +9,6 @@ class MyRemoteClass:
         self.points = {}
         self.offers = {}
         self.lock = Lock()
-        self.bell = Lock()
 
     def get_flag(self):
         return self.available
@@ -35,11 +34,6 @@ class MyRemoteClass:
     def release_lock(self):
         self.lock.release()
 
-    def acquire_bell(self):
-        self.bell.acquire
-
-    def release_bell(self):
-        self.bell.release()
 
 
 class MyManager(BaseManager):
