@@ -16,15 +16,6 @@ man = MyManager(address=("127.0.0.1", 8888), authkey=b'abracadabra')
 man.connect()
 sm = man.sm()
 
-sysv_ipc
-def bell(pid):
-    bell.acquire_bell()
-    if list.count(list[0]) == len(list):
-        print("Vous avez gagné")
-        os.kill(ppid, signal.SIGUSR2)
-    bell.release_bell()
-
-
 def handler(sig, frame):
     global main, ppid
     if sig == signal.SIGUSR1:
@@ -63,10 +54,14 @@ def handler(sig, frame):
         print(main)
         print("Que voulez vous faire? Faire une offre(F), en accepter une(A) ou faire sonner la sonnerie(S) ?")
     elif sig == signal.SIGINT:
-        os.kill(ppid, signal.SIGINT)  # I send sigint to the server if there is an interruption
+        try:
+            os.kill(ppid, signal.SIGINT)  # I send sigint to the server if there is an interruption
+        except ProcessLookupError:
+            sys.exit(1)
+            pass
     elif sig==signal.SIGTERM:
         print("The game has been interrupted")
-        sys.exit(1)
+        sys.exit
 
 
 def valide(list, main):
@@ -173,7 +168,13 @@ if __name__ == "__main__":
                     while True:
                         dispo = sm.get_flag()
                         print(dispo)
-                        cible = int(input("Avec qui voulez vous échanger ? (Mettez 0 pour revenir en arrière) "))
+                        while True:
+                            cible = input("Avec qui voulez vous échanger ? (Mettez 0 pour revenir en arrière) ")
+                            if cible.isnumeric():
+                                cible=int(cible)
+                                break
+                            else:
+                                print("Bad Input! Try again ")
                         if cible == 0:
                             t = False
                             break
@@ -244,6 +245,7 @@ if __name__ == "__main__":
                     if not (len(set(main)) == 1):
                         print("Vous n'avez pas des cartes identiques")
                     else:
+                        print("Vous avez gagné")
                         points = sm.get_points()
                         if pid in points.keys():
                             point = points[pid]
