@@ -19,7 +19,7 @@ sm = man.sm()
 def handler(sig, frame):
     global main, ppid
     if sig == signal.SIGUSR1:
-        print("quelqu'un veut échanger avec vous")
+        print("Someone accepted your offer ")
         offres = sm.get_offers()
         cartes = offres[pid]
         n = 0
@@ -39,12 +39,12 @@ def handler(sig, frame):
         for l in range(len(newcards)):
             main.append(newcards[l])
         print(main)
-        print("Que voulez vous faire? Faire une offre(F), en accepter une(A) ou faire sonner la sonnerie(S) ?")
+        print("What do you want to do ? Make an offer(F), accept one(A) or ring the bell(S) ?")
 
 
     elif sig == signal.SIGUSR2:
-        print("\nFin de la partie!")
-        print("En attente de la main ...")
+        print("\nEnd of the game !")
+        print("Waiting for the cards ...")
         # We get the hand of the player
         try:
             m, _ = mq.receive(type=pid)
@@ -52,7 +52,7 @@ def handler(sig, frame):
             sys.exit(1)
         main = (m.decode()).split()
         print(main)
-        print("Que voulez vous faire? Faire une offre(F), en accepter une(A) ou faire sonner la sonnerie(S) ?")
+        print("What do you want to do ? Make an offer(F), accept one(A) or ring the bell(S) ?")
     elif sig == signal.SIGINT:
         try:
             os.kill(ppid, signal.SIGINT)  # I send sigint to the server if there is an interruption
@@ -79,9 +79,9 @@ def saisieCartes():
     global main
     while True:
         cartes_list = str(
-            input("Quelles cartes voulez vous échanger ? (Mettez E pour revenir en arrière): "))
+            input("Which cards do you want to exchange? (E to go back): "))
         if cartes_list == "E":
-            print("On revient en arrière ")
+            print("Going back ")
             return False
         cartes_list = cartes_list.split()
         if not (
@@ -117,7 +117,7 @@ if __name__ == "__main__":
             print("Leaving")
             sys.exit(1)
         else:
-            print("Your input isets incorrect. Retry ")
+            print("Your input is incorrect. Retry ")
     m = str(pid)
     m = m.encode()
     mq.send(m, type=1)
@@ -169,7 +169,7 @@ if __name__ == "__main__":
                         dispo = sm.get_flag()
                         print(dispo)
                         while True:
-                            cible = input("Avec qui voulez vous échanger ? (Mettez 0 pour revenir en arrière) ")
+                            cible = input("Who do you want to exchange with? (0 to go back) ")
                             if cible.isnumeric():
                                 cible=int(cible)
                                 break
@@ -179,13 +179,13 @@ if __name__ == "__main__":
                             t = False
                             break
                         elif cible==pid:
-                            print("Vous ne pouvez pas accepter votre propre offre")
+                            print("You can't accept your own offer ")
                         elif cible not in dispo.keys():
-                            print("le joueur n'existe pas")
+                            print("The player with this id doesn't exist ")
                         elif not (current[cible]):
-                            print("Ce joueur n'a pas d'offres disponible")
+                            print("This player doesn't have an offer")
                         elif dispo[cible] == False:
-                            print("le joueur n'est pas disponible")
+                            print("This player is busy ")
                         else:
                             break
                     if not t:
@@ -195,7 +195,7 @@ if __name__ == "__main__":
                         if cartes_list == False:
                             break
                         while not (len(cartes_list) == len(current[cible])):
-                            print("veuillez donner autant de cartes que le joueur")
+                            print("You should give as much cards as the other one is offering ")
                             cartes_list = saisieCartes()
                             if cartes_list == False:
                                 break
@@ -245,9 +245,9 @@ if __name__ == "__main__":
                     break
                 elif msg == "S":
                     if not (len(set(main)) == 1):
-                        print("Vous n'avez pas des cartes identiques")
+                        print("The cards are not identical")
                     else:
-                        print("Vous avez gagné")
+                        print("You won ! ")
                         points = sm.get_points()
                         if pid in points.keys():
                             point = points[pid]
