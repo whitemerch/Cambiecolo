@@ -3,6 +3,7 @@ import os
 import sys
 import signal
 from multiprocessing.managers import BaseManager
+import time
 
 main = []
 
@@ -19,8 +20,8 @@ sysv_ipc
 def bell(pid):
     bell.acquire_bell()
     if list.count(list[0]) == len(list):
-        os.kill(ppid, signal.SIGUSR2)
         print("Vous avez gagné")
+        os.kill(ppid, signal.SIGUSR2)
     bell.release_bell()
 
 
@@ -51,26 +52,21 @@ def handler(sig, frame):
 
 
     elif sig == signal.SIGUSR2:
-        print("quelqu'un a remporté cette manche")
-        print("en attente de la main ...")
-        m = str(pid)
-        m = m.encode()
-        mq.send(m, type=1)
-        # To receive the msg that tells the player that he's connected
-        m, _ = mq.receive(type=pid)
-        m = m.decode()
-        print(m)
-        # We get the ppid of the server
-        m, _ = mq.receive(type=pid)
-        ppid = int(m.decode())
+        print("\nFin de la partie!")
+        print("En attente de la main ...")
         # We get the hand of the player
-        m, _ = mq.receive(type=pid)
+        try:
+            m, _ = mq.receive(type=pid)
+        except sysv_ipc.Error:
+            sys.exit(1)
         main = (m.decode()).split()
+        print(main)
         print("Que voulez vous faire? Faire une offre(F), en accepter une(A) ou faire sonner la sonnerie(S) ?")
     elif sig == signal.SIGINT:
         os.kill(ppid, signal.SIGINT)  # I send sigint to the server if there is an interruption
     elif sig==signal.SIGTERM:
         print("The game has been interrupted")
+        sys.exit(1)
 
 
 def valide(list, main):
@@ -126,7 +122,7 @@ if __name__ == "__main__":
             print("Leaving")
             sys.exit(1)
         else:
-            print("Your input is incorrect. Retry ")
+            print("Your input isets incorrect. Retry ")
     m = str(pid)
     m = m.encode()
     mq.send(m, type=1)
@@ -149,6 +145,7 @@ if __name__ == "__main__":
     while True:
         while True:
             t = True
+            time.sleep(1)
             print(main)
             print("What do you want to do ? Make an offer(F), accept one(A) or ring the bell(S) ?")
             msg = str(input("Make your choice: "))
