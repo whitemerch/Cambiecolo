@@ -245,9 +245,8 @@ if __name__ == "__main__":
                     dispo[pid] = True
                     dispo[cible] = True
                     current = sm.get_offers()
-                    vide = []
-                    sm.set_offers(vide, pid)
-                    sm.set_offers(vide, cible)
+                    sm.set_offers([], pid) #deleting all existing offers
+                    sm.set_offers([], cible) #same here but for the other player
                     sm.release_lock()
                     print(main)
                     break
