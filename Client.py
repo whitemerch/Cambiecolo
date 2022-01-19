@@ -20,7 +20,7 @@ sm = man.sm()
 def handler(sig, frame):
     global main, ppid
     if sig == signal.SIGUSR1:
-        print("Someone accepted your offer ")
+        print("\nSomeone accepted your offer ")
         offres = sm.get_offers()
         cartes = offres[pid]
         n = 0
@@ -55,7 +55,7 @@ def handler(sig, frame):
             sys.exit(1)
             pass
     elif sig == signal.SIGTERM:
-        print("The game has been interrupted")
+        print("\nThe game has been interrupted")
         sys.exit(1)
 
 
@@ -132,6 +132,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, handler)
     signal.signal(signal.SIGTERM, handler)
 
+    print("Your user is", pid)
     while True:
         while True:
             t = True
@@ -156,7 +157,10 @@ if __name__ == "__main__":
                     current = sm.get_offers()
                     offredisp = "["
                     for mec, propose in current.items():
-                        offredisp += "[" + str(mec) + " offers " + str(len(propose)) + " cards] "
+                        if mec!=pid:
+                            offredisp += "[" + str(mec) + " offers " + str(len(propose)) + " cards] "
+                        else:
+                            offredisp+="[Your offer: "+str(propose)
                     offredisp += "]"
                     print(offredisp)
                     sm.release_lock()
@@ -167,7 +171,10 @@ if __name__ == "__main__":
                     current = sm.get_offers()
                     offredisp = "["
                     for mec, propose in current.items():
-                        offredisp += "[" + str(mec) + " offer " + str(len(propose)) + " cards] "
+                        if mec!=pid:
+                            offredisp += "[" + str(mec) + " offers " + str(len(propose)) + " cards] "
+                        else:
+                            offredisp+="Your offer: "+str(propose)+" "
                     offredisp += "]"
                     print(offredisp)
                     while True:
@@ -207,7 +214,6 @@ if __name__ == "__main__":
                     if cartes_list == False:
                         break
                     sm.acquire_lock()
-                    sm.set_offers(cartes_list, pid)
                     current = sm.get_offers()
                     dispo = sm.get_flag()
                     dispo[pid] = False
@@ -215,25 +221,16 @@ if __name__ == "__main__":
                     sm.release_lock()
                     # envoi d'un signal pour faire stopper la cible
                     os.kill(cible, signal.SIGUSR1)
-                    # envoi des cartes avec mq ici
-                    # reception (maj des cartes en main)
-                    n = 0
-                    while n < len(current[pid]):
-                        for k in range(len(main)):
-                            if main[k] == cartes_list[0]:
-                                main.pop(k)
-                                n += 1
-                                break
+                    for i in cartes_list:
+                        main.remove(i)
                     n, _ = mq.receive()
                     newcards = (n.decode()).split()
                     for l in range(len(newcards)):
                         main.append(newcards[l])
 
-                    offres = sm.get_offers()
-                    cartes = offres[pid]
                     msg = ""
-                    for q in range(len(cartes)):
-                        msg += cartes[q] + " "
+                    for q in range(len(cartes_list)):
+                        msg += cartes_list[q] + " "
                     msg = msg.encode()
                     mq.send(msg, type=3)
 
@@ -242,7 +239,6 @@ if __name__ == "__main__":
                     dispo[pid] = True
                     dispo[cible] = True
                     current = sm.get_offers()
-                    sm.set_offers([], pid)  # deleting all existing offers
                     sm.set_offers([], cible)  # same here but for the other player
                     sm.release_lock()
                     print(main)
