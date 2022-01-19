@@ -160,7 +160,7 @@ if __name__ == "__main__":
                     print(offredisp)
                     sm.release_lock()
                     for i in cartes_list:
-                        hand.remove(i)
+                        main.remove(i)
                     break
                 elif msg == "A":
                     current = sm.get_offers()
