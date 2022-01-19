@@ -23,12 +23,6 @@ def handler(sig, frame):
         offres = sm.get_offers()
         cartes = offres[pid]
         n = 0
-        while n < len(current[pid]):
-            for k in range(len(main)):
-                if main[k] == cartes[0]:
-                    main.pop(k)
-                    n += 1
-                    break
         msg = ""
         for q in range(len(cartes)):
             msg += cartes[q] + " "
@@ -165,6 +159,8 @@ if __name__ == "__main__":
                     offredisp+="]"
                     print(offredisp)
                     sm.release_lock()
+                    for i in cartes_list:
+                        hand.remove(i)
                     break
                 elif msg == "A":
                     current = sm.get_offers()
