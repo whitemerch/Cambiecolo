@@ -156,7 +156,7 @@ if __name__ == "__main__":
                     current = sm.get_offers()
                     offredisp = "["
                     for mec, propose in current.items():
-                        offredisp += "[" + str(mec) + " offer " + str(len(propose)) + " cards] "
+                        offredisp += "[" + str(mec) + " offers " + str(len(propose)) + " cards] "
                     offredisp += "]"
                     print(offredisp)
                     sm.release_lock()
