@@ -159,12 +159,20 @@ if __name__ == "__main__":
                     sm.acquire_lock()
                     sm.set_offers(cartes_list, pid)
                     current = sm.get_offers()
-                    print(current)
+                    offredisp="["
+                    for mec,propose in current.items():
+                        offredisp+="["+str(mec)+" offer "+str(len(propose))+" cards] "
+                    offredisp+="]"
+                    print(offredisp)
                     sm.release_lock()
                     break
                 elif msg == "A":
                     current = sm.get_offers()
-                    print(current)
+                    offredisp="["
+                    for mec,propose in current.items():
+                        offredisp+="["+str(mec)+" offer "+str(len(propose))+" cards] "
+                    offredisp+="]"
+                    print(offredisp)
                     while True:
                         dispo = sm.get_flag()
                         print(dispo)
