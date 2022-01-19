@@ -16,6 +16,7 @@ man = MyManager(address=("127.0.0.1", 8888), authkey=b'abracadabra')
 man.connect()
 sm = man.sm()
 
+
 def handler(sig, frame):
     global main, ppid
     if sig == signal.SIGUSR1:
@@ -23,12 +24,6 @@ def handler(sig, frame):
         offres = sm.get_offers()
         cartes = offres[pid]
         n = 0
-        while n < len(current[pid]):
-            for k in range(len(main)):
-                if main[k] == cartes[0]:
-                    main.pop(k)
-                    n += 1
-                    break
         msg = ""
         for q in range(len(cartes)):
             msg += cartes[q] + " "
@@ -59,7 +54,7 @@ def handler(sig, frame):
         except ProcessLookupError:
             sys.exit(1)
             pass
-    elif sig==signal.SIGTERM:
+    elif sig == signal.SIGTERM:
         print("The game has been interrupted")
         sys.exit(1)
 
@@ -159,26 +154,36 @@ if __name__ == "__main__":
                     sm.acquire_lock()
                     sm.set_offers(cartes_list, pid)
                     current = sm.get_offers()
-                    print(current)
+                    offredisp = "["
+                    for mec, propose in current.items():
+                        offredisp += "[" + str(mec) + " offer " + str(len(propose)) + " cards] "
+                    offredisp += "]"
+                    print(offredisp)
                     sm.release_lock()
+                    for i in cartes_list:
+                        main.remove(i)
                     break
                 elif msg == "A":
                     current = sm.get_offers()
-                    print(current)
+                    offredisp = "["
+                    for mec, propose in current.items():
+                        offredisp += "[" + str(mec) + " offer " + str(len(propose)) + " cards] "
+                    offredisp += "]"
+                    print(offredisp)
                     while True:
                         dispo = sm.get_flag()
                         print(dispo)
                         while True:
                             cible = input("Who do you want to exchange with? (0 to go back) ")
                             if cible.isnumeric():
-                                cible=int(cible)
+                                cible = int(cible)
                                 break
                             else:
                                 print("Bad Input! Try again ")
                         if cible == 0:
                             t = False
                             break
-                        elif cible==pid:
+                        elif cible == pid:
                             print("You can't accept your own offer ")
                         elif cible not in dispo.keys():
                             print("The player with this id doesn't exist ")
@@ -237,9 +242,8 @@ if __name__ == "__main__":
                     dispo[pid] = True
                     dispo[cible] = True
                     current = sm.get_offers()
-                    vide = []
-                    sm.set_offers(vide, pid)
-                    sm.set_offers(vide, cible)
+                    sm.set_offers([], pid)  # deleting all existing offers
+                    sm.set_offers([], cible)  # same here but for the other player
                     sm.release_lock()
                     print(main)
                     break
